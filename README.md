@@ -4,6 +4,7 @@ WorkerPool
 An implementation of Web workers pool to facilitate task distribution and pool maintenance.
 the source code is written in TypeScript.
 
+Demo : http://ezelia.com/wp-content/uploads/labs/WorkerPool/index.html
 
 Usage
 =====
