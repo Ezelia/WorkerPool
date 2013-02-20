@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>WorkerPool App</title>    
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js?ver=1.9.0" ></script>
+    <script src="WorkerPool.js"></script>
+
+    <style>
+        body {
+            background:#d7c9ad;
+        }
+        #content {
+            display:block;
+            border:2px solid gray;
+            background:#000;
+            font:700 9px verdana;
+            color:#dadada;
+            width:500px;
+            height:400px;
+            overflow:scroll;
+            padding:10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WorkerPool test</h1>
+
+    <div>
+    <b>Number of workers</b><input type="text" id="nb" value="2" /><button id="launch">Launch tests</button> | <button id="clear">Clear</button>
+    <div id="content">
+    </div>
+
+    </div>
+
+    <script>
+        var stime = 0;
+        var timer = false;
+        var wPool = new Ezelia.WorkerPool();
+        //we can also initialize it with something like : var wPool = new Ezelia.WorkerPool(4, "worker.js");
+
+        
+
+        wPool.onTasksDone(function () {            
+            Logger.log('-------------------------------------------------');
+            if (stime > 0) Logger.log('Total time = ' + (new Date().getTime() - stime) + 'ms <br />&nbsp;<br />', '#0e0');
+        });
+
+        function launchWorkerPool() {
+            stime = new Date().getTime();
+            for (var i = 0; i < 10; i++) {
+                wPool.addTask({ t: i }, function (data) {
+                    Logger.log('task ' + data.__taskId + ' result ' + data.result);
+                    
+                });
+            }
+
+            // start new tasks after 15 seconds
+
+            timer = setTimeout(function () {
+                wPool.clearTasks();
+                console.log('New tasks');
+                stime = new Date().getTime();
+                for (var i = 0; i < 5; i++) {
+                    wPool.addTask({ t: i }, function (data) {
+                        Logger.log('task ' + data.__taskId + ' result ' + data.result);
+                        
+                    });
+                }
+
+            }, 10000);
+        }
+
+
+        $('#clear').click(function () {
+            Logger.clear();
+        });
+
+        // Events
+        $('#launch').click(function () {
+            if (timer !== false) clearTimeout(timer);
+            
+            var wnb = parseInt($('#nb').val());
+            if (isNaN(wnb)) {
+                Logger.log('Error : Wrong input format');
+                return;
+            }
+
+            Logger.log('initializing a worker pool with ' + wnb + ' workers');
+            wPool.reset(wnb, "worker.js");
+
+            Logger.log('Will launch 10 tasks immediatly and 5 other tasks ten seconds later ...');
+            launchWorkerPool();
+        });
+
+        var Logger = {
+            log: function (msg, color) {
+                var cc = color || '#dadada';
+                $('#content').append('<div style="color:' + cc + '">' + msg + '</div>');
+                $('#content').scrollTop($('#content').get(0).scrollHeight);
+            },
+            clear: function ()
+            {
+                $('#content').html('');
+            }
+        }
+    </script>
+</body>
+</html>
